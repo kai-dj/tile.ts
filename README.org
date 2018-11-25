@@ -1,2 +1,18 @@
 * tile.ts
 a program for creating aperiodic patterns
+** TODO
+*** high priority
+- [ ] add import option for patterns in json format
+- [ ] add triangle module for triangle based patterns
+- [ ] add math module
+  - [ ] calculate inflation/deflation factor (eigenwert?)
+*** normal priority
+- [ ] integrate export button 
+- [ ] add various polygons
+- [ ] decoration definition and execution
+
+** ideas
+- [ ] color schemes
+- [ ] automatic rule image extraction
+- [ ] gamification
+- [ ] also feature tile placement "by edge"
