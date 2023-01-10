@@ -1,4 +1,4 @@
-function randomColorByLetters():string {
+function randomColorWithLetters():string {
     const letters:string = '0123456789ABCDEF';
     let color:string = '#';
     for (let i:number = 0; i < 3; i++) {
@@ -8,5 +8,5 @@ function randomColorByLetters():string {
 };
 
 export function getRandomColor(): string {
-    return randomColorByLetters();
+    return randomColorWithLetters();
 };

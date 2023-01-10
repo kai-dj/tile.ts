@@ -28,7 +28,7 @@ export class Triangle {
 
     calcTriangle() {
         let td = this.triangleData;
-   
+
         if (td.a && td.b && td.c) {
             console.log("SSS");
             this.calc_SSS(td);
