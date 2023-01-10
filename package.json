@@ -4,12 +4,16 @@
   "description": "program for aperiodic tilings",
   "main": "tile.js",
   "dependencies": {
-    "svg.js": "^2.7.0"
+    "@svgdotjs/svg.draggable.js": "^3.0.2",
+    "@svgdotjs/svg.js": "^3.1.1",
+    "@svgdotjs/svg.panzoom.js": "^2.1.2",
+    "mathjs": "^10.1.0",
+    "svg-pan-zoom": "github:ariutta/svg-pan-zoom"
   },
   "devDependencies": {
     "ts-loader": "^5.3.0",
     "typescript": "^3.1.6",
-    "webpack": "^4.26.0",
+    "webpack": "^4.46.0",
     "webpack-cli": "^3.1.2"
   },
   "scripts": {

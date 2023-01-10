@@ -1,227 +1,200 @@
-import * as SVG from 'svg.js';
-// import {getRandomColor} from '../modules/ColorTools';
-import Triangle, * as triangle from '../modules/Triangle';
+import {
+    ArrayXY,
+    CoordinateXY,
+    G,
+    Matrix,
+    Point,
+    PointArray,
+    Polygon,
+    SVG,
+    Svg,
+    MatrixExtract,
+    StrokeData, on, Timeline, Runner, Color
+} from '@svgdotjs/svg.js'
+import { Triangle, TriangleData, TrianglePointName } from "../modules/Triangle"
+import { Prototile, PrototileReplacement } from "../modules/Prototile"
+import { calculateEigenvalue } from '../modules/Eigenvalue'
+import { getRandomColor } from "../modules/ColorTools"
+import { log, logJSON } from '../modules/ConsoleHelper'
+import { download, generateUUID, initSvg } from '../modules/SvgHelper'
+import { diagonalNumbers } from '../modules/Grid'
+import { getFPolygon } from '../modules/SvgHelper'
+
+log("Start tile-ts ")
+
+let windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+let windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+windowWidth = windowWidth * 0.8
+windowHeight = windowHeight * 0.8
+let minSize = Math.min(windowWidth, windowHeight)
+
+let timeLineArray: Timeline[] = []
+let runnerLibrary: Runner[] = []
+
+//const size: number = 1080
+const scale: number = minSize 
+const svgContainerId: string = 'drawing'
+let svg = initSvg(minSize, minSize)
+
+log("svg size: " + minSize + "x" + minSize)
+let defs = svg.defs()
+//diagonalNumbers(svg, 100, size, 100)
+
+const inflation: number = Math.sqrt(2)
+const deflation: number = 1 / Math.sqrt(2)
+
+const defaultStroke = { color: '#00f', width: 5, linecap: "butt", linejoin: "bevel" }
+let blackStroke: StrokeData = { color: '#fff', width: 10, linecap: "butt", linejoin: "bevel" };
+
+let pinwheel_1_3_triangle0 = new Triangle({ a: 1 * scale, b: Math.sqrt(2) * scale, c: 1 * scale }).calcTriangle()
+let pinwheel_1_3_triangle1 = new Triangle({ a: Math.sqrt(2) * scale, b: 2 * scale, c: Math.sqrt(2) * scale }).calcTriangle()
+let pinwheel_1_3_triangle2 = new Triangle({ a: 2 * scale, b: 2 * Math.sqrt(2) * scale, c: 2 * scale }).calcTriangle()
+log(pinwheel_1_3_triangle2.triangleData)
 
 
-let t = new Triangle({});
-console.log(t.description);
-let drawing: HTMLElement = document.getElementById("drawing");
-drawing.innerHTML = "";
-let scale: number = 800;
-let size: number = 800;
-let deflation: number = 1 / (Math.sqrt(2) + 1);
-let draw: SVG.Doc = SVG('drawing').size(size, size);
+let prototileArray: Prototile[] = [
+    new Prototile()
+        //.add(new Polygon({ points: pinwheel_1_3_triangle0.getPointArray().toString() }).stroke(blackStroke).fill("#f8cb66"))
+        .add(getFPolygon(50).translate(50, 0))
+        //.add(getFPolygon(50).translate(-50, -50))
+        .addReplacement(new PrototileReplacement(1, new Matrix().scale(deflation, deflation)))
+    , new Prototile()
+        //.add(new Polygon({ points: pinwheel_1_3_triangle1.getPointArray().toString() }).stroke(blackStroke).fill("#ff6600"))
+        //.add(getFPolygon(50).translate(50, 0))
+        //.add(getFPolygon(50).translate(-50, -50))
+        .addReplacement(new PrototileReplacement(2, new Matrix().scale(deflation, deflation)))
+    , new Prototile()
+        //.add(new Polygon({ points: pinwheel_1_3_triangle2.getPointArray().toString() }).stroke(blackStroke).fill("#0f0066"))
+        //.add(getFPolygon(50).translate(50, 0))
+        //.add(getFPolygon(50).translate(-50, -50))
+        //.addReplacement(new PrototileReplacement(0, new Matrix().scale(deflation, deflation).rotate(22.5 * 6, 0, 0).translate(1 * scale, 0 * deflation * scale)))
+        //.addReplacement(new PrototileReplacement(0, new Matrix().scale(deflation, -deflation).rotate(22.5 * 6, 0, 0).translate(1 * scale, 0 * deflation * scale)))
+        //.addReplacement(new PrototileReplacement(0, new Matrix().scale(deflation, deflation).rotate(22.5 * 2, 0, 0).translate(1 * scale, 0 * deflation * scale)))
+        //.addReplacement(new PrototileReplacement(0, new Matrix().scale(deflation, -deflation).rotate(22.5 * 2, 0, 0).translate(1 * scale, 0 * deflation * scale)))
+        //.addReplacement(new PrototileReplacement(0, new Matrix().scale(deflation, deflation).rotate(22.5 * 6, 0, 0).translate(2 * scale, 0 * deflation * scale)))
+        //.addReplacement(new PrototileReplacement(0, new Matrix().scale(deflation, deflation).rotate(22.5 * 10, 0, 0).translate(1 * scale, 1 * scale)))
+        //.addReplacement(new PrototileReplacement(2, new Matrix().scale(deflation, deflation).rotate(22.5 * 10, 0, 0).translate(2 * scale, 2 * scale)))
+    //.addReplacement(new PrototileReplacement(0, new Matrix().scale(-deflation, deflation).rotate(22.5 * 2, 0, 0).translate((Math.sqrt(2) + 1) * deflation * scale, 1 * deflation * scale)))
+    //.addReplacement(new PrototileReplacement(0, new Matrix().scale(deflation, deflation).rotate(22.5 * -6, 0, 0).translate((Math.sqrt(2) + 1) * deflation * scale, 1 * deflation * scale)))
+    //.addReplacement(new PrototileReplacement(0, new Matrix().scale(-deflation, deflation).rotate(22.5 * 6, 0, 0).translate((Math.sqrt(2) + 1) * deflation * scale, 1 * deflation * scale)))
+    //.addReplacement(new PrototileReplacement(2, new Matrix().scale(-deflation, deflation).rotate(22.5 * -2, 0, 0).translate((Math.sqrt(2) + 1 + 1) * deflation * scale, 0 * deflation * scale)))
+]
 
-const pi: number = Math.PI;
+function clickAllGroups() {
+    log("clickAllGroups")
+    let elements = document.getElementsByTagName('g');
+    for (let i = 0, len = elements.length; i < len; i++) {
+        log(elements[i].id)
+        elements[i].dispatchEvent(new Event('click'))
+    }
+}
+function protoClick() {
+    log("protoClick ")
+    this.off('click')
+    let eventPrototile: Prototile = this
+    setTimeout(function () {
+        eventPrototile.hide//.opacity(0.3)
+    }, 1000)
+ 
+    let replacementList: PrototileReplacement[] = eventPrototile.replacements
+    replacementList.forEach(replacement => {
 
-let T1 = {
-    C: [0, 0]
-    , B: [scale * 1, 0]
-    , A: [0, scale * 1]
-    , a: 1
-    , b: 1
-    , c: Math.sqrt(2)
-    , α: pi / 4
-    , β: pi / 4
-    , γ: pi / 2
-    , ha: 1 * Math.sin(pi / 2)
-    , hb: Math.sqrt(2) * Math.sin(pi / 4)
-    , hc: 1 * Math.sin(pi / 4)
-};
+        let replacePrototile = prototileArray[replacement.prototypeNumber].cloneWithReplacement(eventPrototile.recursion + 1);
+        svg.add(replacePrototile)
+        replacePrototile.transform(eventPrototile.matrix())
+        replacePrototile
+            //.animate(1000).ease('-')
+            .transform(eventPrototile.matrix().multiply(replacement.localTransformMatrix))
+        // replacePrototile.timeline().pause()
+        //
+        // replacePrototile.mouseover(function() { this.timeline().play() })
+        // replacePrototile.mouseout(function() { this.timeline().pause() })
+        replacePrototile.on('click', protoClick)
+        //eventPrototile.recursion*5*(inflation/inflation)
+        //        replacePrototile.children()[0].stroke(
+        //            { color: '#000', width: 5 * (eventPrototile.recursion) * inflation, linecap: "butt", linejoin: "bevel" }
+        //            )
+        //replacePrototile.opacity(0.3)
+        //.translate(1 * deflation * scale, 1 * deflation * scale)
+        //.transform(replacement.localTransformMatrix.multiply(eventPrototile.transform()), false, true)
+        //.rotate(22.5 * 6, 0, 0).translate((Math.sqrt(2) + 1 + 1) * deflation * scale, 0 * deflation * scale)
+        //replacePrototile.ungroup(this)
+        /*if (replacePrototile.recursion<4) {
+        setTimeout(function () {
+            replacePrototile.fire('click')
+        },
 
-let T2 = {
-    C: [0, 0]
-    , B: [scale * Math.sqrt(2) * Math.sin(3 * pi / 8) / Math.sin(pi / 2), 0]
-    , A: [0, scale * Math.sqrt(2) * Math.sin(pi / 8) / Math.sin(pi / 2)]
-    , a: Math.sqrt(2) * Math.sin(3 * pi / 8) / Math.sin(pi / 2)
-    , b: Math.sqrt(2) * Math.sin(pi / 8) / Math.sin(pi / 2)
-    , c: Math.sqrt(2)
-    , α: 3 * (pi / 8)
-    , β: pi / 8
-    , γ: pi / 2
-    , ha: Math.sqrt(2) * Math.sin(pi / 8) / Math.sin(pi / 2) * Math.sin(pi / 2)
-    , hb: Math.sqrt(2) * Math.sin(3 * (pi / 8))
-    , hc: Math.sqrt(2) * Math.sin(3 * pi / 8) / Math.sin(pi / 2) * Math.sin(pi / 8)
-    , pc: Math.sqrt(
-        (Math.sqrt(2) * Math.sin(pi / 8) / Math.sin(pi / 2)) *
-        (Math.sqrt(2) * Math.sin(pi / 8) / Math.sin(pi / 2)) -
-        (Math.sqrt(2) * Math.sin(3 * pi / 8) / Math.sin(pi / 2) * Math.sin(pi / 8)) *
-        (Math.sqrt(2) * Math.sin(3 * pi / 8) / Math.sin(pi / 2) * Math.sin(pi / 8))
-    )
-};
-
-
-function clk() {
-    let color = this.children()[0].attr('fill');
-    console.log('%c ahoi', 'color:' + color + ';font-weight: bold;');
-    var gg = draw.group();
-    const thisM = new SVG.Matrix(this);
-    this.off('click');
-    gg.polygon(pt2).fill('#0066ff').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(tm1));
-    gg.on('click', clk);
-
-    gg = draw.group();
-    gg.polygon(pt2).fill('#0066ff').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(tm2));
-    gg.on('click', clk);
-
-    gg = draw.group();
-    gg.polygon(pt2).fill('#0066ff').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(tm3));
-    gg.on('click', clk);
-
-    gg = draw.group();
-    gg.polygon(pt1).fill('#ff6600').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(tm4));
-    gg.on('click', clk1);
-
-    gg = draw.group();
-    gg.polygon(pt1).fill('#ff6600').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(tm5));
-    gg.on('click', clk1);
-
-
-    this.remove();
-
+        Math.floor(Math.random()*1000*eventPrototile.recursion)+3000*0+1000)
+        } else {
+            console.log("recursion depth reached")
+        }*/
+    })
+    //proto2.translate(1,1)}
 }
 
-function clk1() {
-    let color = this.children()[0].attr('fill');
-    console.log('%c ahoi', 'color:' + color + ';font-weight: bold;');
-    let gg = draw.group();
-    let thisM = new SVG.Matrix(this);
-    this.off('click');
-
-    gg.polygon(pt1).fill('#ff6600').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(xtm1));
-    gg.on('click', clk1);
-
-    gg = draw.group();
-    gg.polygon(pt1).fill('#ff6600').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(xtm2));
-    gg.on('click', clk1);
-
-    gg = draw.group();
-    gg.polygon(pt1).fill('#ff6600').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(xtm3));
-    gg.on('click', clk1);
-
-    gg = draw.group();
-    gg.polygon(pt2).fill('#0066ff').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(xtm4));
-    gg.on('click', clk);
-
-    gg = draw.group();
-    gg.polygon(pt2).fill('#0066ff').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(xtm5));
-    gg.on('click', clk);
-
-    gg = draw.group();
-    gg.polygon(pt2).fill('#0066ff').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(xtm6));
-    gg.on('click', clk);
-
-    gg = draw.group();
-    gg.polygon(pt2).fill('#0066ff').stroke({width: 5}).opacity(1);
-    gg.transform(thisM.scale(deflation)).animate(200).transform(thisM.multiply(xtm7));
-    gg.on('click', clk);
-
-    this.remove();
-//  
+function touchMoveProto() {
+    console.log("bla")
 }
+let seedproto0: Prototile = prototileArray[0].cloneWithReplacement(0).translate(0*2* scale, 0*2*scale).rotate(0, 0, 0).on('click', protoClick).id("spt0")//.on('touchmove', touchMoveProto)
+seedproto0.recursion = 1;
+svg.add(seedproto0)
 
+//let seedproto1: Prototile = prototileArray[1].cloneWithReplacement(1).translate(2* scale, 0).rotate(0, 0, 0).on('click', protoClick).id("spt1")//.on('touchmove', touchMoveProto)
+//seedproto1.recursion = 1;
+//svg.add(seedproto1)
+//let seedproto2: Prototile = prototileArray[2].cloneWithReplacement(1).translate(0, 0).rotate(0, 0, 0).on('click', protoClick).id("spt2")//.on('touchmove', touchMoveProto)
+//seedproto2.recursion = 1;
+//svg.add(seedproto2)
 
-//backgroud = draw.rect( size, size ).fill( "#fff" );
+//let seedproto1: Prototile = prototileArray[2].cloneWithReplacement(1).translate(2 * scale, 0).rotate(0, 0, 0).on('click', protoClick).id("spt1")//.on('touchmove', touchMoveProto)
+//seedproto1.recursion = 1;
+//svg.add(seedproto1)
+//let seedproto2: Prototile = prototileArray[2].cloneWithReplacement(1).translate(2 * scale, 2 * scale).rotate(0, 0, 0).on('click', protoClick).id("spt2")//.on('touchmove', touchMoveProto)
+//seedproto2.recursion = 1;
+//svg.add(seedproto2)
+//let seedproto3: Prototile = prototileArray[2].cloneWithReplacement(1).translate(0 * scale, 2 * scale).rotate(0, 0, 0).on('click', protoClick).id("spt3")//.on('touchmove', touchMoveProto)
+//seedproto3.recursion = 1;
+//svg.add(seedproto3)
+//let seedproto4: Prototile = prototileArray[2].cloneWithReplacement(1).translate(2 * scale, 2 * scale).rotate(8*22.5, 0, 0).on('click', protoClick).id("spt4")//.on('touchmove', touchMoveProto)
+//seedproto4.recursion = 1;
+//svg.add(seedproto4)
+//let seedproto5: Prototile = prototileArray[2].cloneWithReplacement(1).translate(4 * scale, 2 * scale).rotate(8*22.5, 0, 0).on('click', protoClick).id("spt5")//.on('touchmove', touchMoveProto)
+//seedproto5.recursion = 1;
+//svg.add(seedproto5)
+//let seedproto6: Prototile = prototileArray[2].cloneWithReplacement(1).translate(4 * scale, 4 * scale).rotate(8*22.5, 0, 0).on('click', protoClick).id("spt6")//.on('touchmove', touchMoveProto)
+//seedproto6.recursion = 1;
+//svg.add(seedproto6)
+//let seedproto7: Prototile = prototileArray[2].cloneWithReplacement(1).translate(2 * scale, 4 * scale).rotate(8*22.5, 0, 0).on('click', protoClick).id("spt7")//.on('touchmove', touchMoveProto)
+//seedproto7.recursion = 1;
+//svg.add(seedproto7)
+seedproto0.on('click', protoClick)
+//seedproto1.on('click', protoClick)
+//seedproto2.on('click', protoClick)
+//seedproto0.fire('click')
+//seedproto1.fire('click')
+//seedproto2.fire('click')
 
-let g = draw.group();
-let g1 = draw.group();
-
-const pt1 = new SVG.PointArray([
-    T1.C
-    , T1.B
-    , T1.A
-]);
-
-const pt2 = new SVG.PointArray([
-    T2.C
-    , T2.B
-    , T2.A
-]);
-
-// g.polygon( pt2 ).fill( '#f60' ).stroke( {
-//   width: 0
-// } ).opacity( 1 );
-
-g1.polygon(pt1).fill('#f60').stroke({
-    width: 0
-}).opacity(1);
-
-let tm1 = (new SVG.Matrix).translate(0, 0 * scale).rotate(90).scale(deflation, -deflation);
-let tm2 = (new SVG.Matrix).translate((T2.b + T2.a) * deflation * scale, 0).rotate(0).scale(deflation);
-let tm3 = (new SVG.Matrix).translate((T2.b + T2.a) * deflation * scale, 0).rotate(0).scale(-deflation, deflation);
-//
-let tm4 = (new SVG.Matrix).translate(((T2.hb - T2.hb * deflation) / 2) * scale, (T2.ha * deflation + (T2.ha - T2.ha * deflation) / 2) * scale).rotate(157.5).scale(deflation);
-let tm5 = (new SVG.Matrix).translate(((T2.hb - T2.hb * deflation) / 2) * scale, (T2.ha * deflation + (T2.ha - T2.ha * deflation) / 2) * scale).rotate(247.5).scale(deflation);
-
-
-let xtm1 = (new SVG.Matrix).translate(0, 0 * scale).rotate(90).scale(deflation, -deflation);
-let xtm2 = (new SVG.Matrix).translate(T1.hc * deflation * scale, (T1.a + T1.hc) * deflation * scale).rotate(135).scale(deflation, deflation);
-let xtm3 = (new SVG.Matrix).translate(T1.hc * deflation * scale, (T1.a + T1.hc) * deflation * scale).rotate(225).scale(deflation, deflation);
-let xtm4 = (new SVG.Matrix).translate((T2.pc * deflation) * scale + scale * deflation, (T2.hc) * deflation * scale).rotate(337.5).scale(deflation, deflation);
-let xtm5 = (new SVG.Matrix).translate((T2.pc * deflation) * scale + scale * deflation, (T2.hc) * deflation * scale).rotate(337.5).scale(deflation, -deflation);
-let xtm6 = (new SVG.Matrix).translate((T2.pc * deflation) * scale + scale * deflation, (T2.hc) * deflation * scale).rotate(157.5).scale(deflation, -deflation);
-let xtm7 = (new SVG.Matrix).translate((T2.pc * deflation) * scale + scale * deflation, (T2.hc) * deflation * scale).rotate(157.5).scale(deflation, deflation);
-
-// xtm2 = ( new SVG.Matrix ).translate( (T2.b+T2.a) *deflation * scale, 0 ).rotate( 0 ).scale( deflation );
-// xtm3 = ( new SVG.Matrix ).translate( (T2.b+T2.a) *deflation * scale, 0 ).rotate( 0 ).scale( -deflation,deflation );
-// xtm4 = ( new SVG.Matrix ).translate( ((T2.hb-T2.hb*deflation)/2)*scale,(T2.ha*deflation+(T2.ha-T2.ha*deflation)/2)*scale ).rotate( 157.5 ).scale( deflation );
-// xtm5 = ( new SVG.Matrix ).translate( ((T2.hb-T2.hb*deflation)/2)*scale,(T2.ha*deflation+(T2.ha-T2.ha*deflation)/2)*scale ).rotate( 247.5 ).scale( deflation );
-// xtm6 = ( new SVG.Matrix ).translate( 0.25 * scale, 0.25 * scale ).rotate( 0 ).scale( deflation );
-
-
-// gg=g.clone();
-// gg.children()[0].opacity(1)
-// g.move(500,500);
-g1.front();
-//g12=g1.clone();
-// thisM = new SVG.Matrix( g );
-// gg.animate(500).transform(thisM.multiply(tm3));
-// ggg=g1.clone();
-// ggg.animate(500).transform(thisM.multiply(tm4));
-let g12 = g1.clone()
-//g12.children()[0].fill("#f60");
-g12.rotate(-45, scale, 0);
-g12.scale(1 / Math.sqrt(2), scale, 0);
-
-let g13 = g12.clone();
-//g13.children()[0].fill("#0ff");
-g13.front();
-g13.rotate(180 - 45);
-g13.translate(scale / 2, scale / 2);
-//g13.scale(1/Math.sqrt(2),scale,0);
-
-let g14 = g12.clone();
-//g14.children()[0].fill("#f0f");
-g14.rotate(-90 - 45);
-g14.translate(scale / 2, scale / 2);
-
-
-g1.rotate(45, 0, scale);
-//g1.move(scale,0);
-g1.scale(1 / Math.sqrt(2), 0, scale);
-g1.on('click', clk1);
-g12.on('click', clk1);
-g13.on('click', clk1);
-g14.on('click', clk1);
-
-g14.click;
-g14.click;
-g14.click;
-g14.click;
-
-let elements = document.getElementsByTagName('g');
-
-for (var i = 0, len = elements.length; i < len; i++) {
-    elements[i].dispatchEvent(new Event('click'));
+//seedproto0.opacity(0.5)
+//seedproto1.opacity(0.5)
+//seedproto2.opacity(0.5)
+//seedproto1.on('click', protoClick)
+//seedproto2.on('click', protoClick)
+//seedproto3.on('click', protoClick)
+//seedproto4.on('click', protoClick)
+//seedproto5.on('click', protoClick)
+//seedproto6.on('click', protoClick)
+//seedproto7.on('click', protoClick)
+let clickAllButton = document.getElementsByClassName('button_click_all')[0]
+on(clickAllButton, 'click', clickAllGroups)
+let downloadButton = document.getElementsByClassName('button_download')[0]
+function downloadSvg() {
+    let dateIsoString = Date.now()
+    download("pattern-" + dateIsoString + ".svg", svg.svg())
 }
+on(downloadButton, 'click', downloadSvg)
+
+//log(seedproto0.replacements.length)
+//calculateEigenvalue(prototileArray)
+//clickAllButton.fire('click')
+
+console.error(JSON.stringify(prototileArray))

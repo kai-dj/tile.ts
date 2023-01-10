@@ -2,3 +2,8 @@ node_modules/*
 dist/*
 /package-lock.json
 /.idea/
+/livereload.log
+/dist.zip
+/webpack.log
+/webpacklog.txt
+/.vscode/
