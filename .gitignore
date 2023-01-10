@@ -8,3 +8,4 @@ dist/*
 /webpacklog.txt
 /.vscode/
 /.bak/
+/node_modules/
