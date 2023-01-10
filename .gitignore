@@ -7,3 +7,4 @@ dist/*
 /webpack.log
 /webpacklog.txt
 /.vscode/
+/.bak/
